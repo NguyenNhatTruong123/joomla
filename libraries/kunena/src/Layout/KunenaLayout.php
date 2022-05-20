@@ -408,6 +408,8 @@ class KunenaLayout extends KunenaBase
 
 		KunenaProfiler::getInstance() ? KunenaProfiler::instance()->stop('function ' . __CLASS__ . '::' . __FUNCTION__ . '()') : null;
 
+		$link = str_replace("<a ", "<a style=".'"flex: 1"'."", $link);
+
 		return $link;
 	}
 

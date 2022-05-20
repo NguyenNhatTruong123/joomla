@@ -1,13 +1,17 @@
 /* -----------------------------------------------------------------------------
-
   COMPENENTS - RATING
-
 ----------------------------------------------------------------------------- */
 #krating {
-	display: inline-block;
-	left: 4px;
+	display: flex;
+	/* left: 4px; */
 	position: relative;
-	top: 4px;
+	/* top: 4px; */
+	align-items: flex-start;
+}
+
+#kunena.layout h1 {
+	font-size: 28px !important;
+	line-height: unset !important;
 }
 
 #ktopicsform [class*='category'] #krating-top {
@@ -36,9 +40,14 @@
 	cursor: pointer;
 }
 
-#kunena .c-rating__item:hover,
 #kunena .c-rating__item.is-active {
+	background: url("../images/stars.svg");
 	background-position: -24px 0;
+}
+
+#kunena .c-rating__item.is-hover{
+	background-position: -24px 0;
+	background: url("../images/starshover.svg") !important;
 }
 
 #ktopicsform [class*='category'] .c-rating__item {
@@ -59,5 +68,61 @@
 }
 
 #ktopicsform [class*='category'] .c-rating__item .is-active:hover {
-	background-position: 0;
+	background-position: 0 0;
 }
+
+.star-wrapper {
+	top: 50%;
+	left: 50%;
+	display: flex;
+
+  }
+  .s1,.s2,.s3,.s4,.s5,.star-wrapper a {
+	font-size: 1.5em;
+	color: grey;
+	text-decoration: none;
+	transition: all 0.2s;
+	margin: 4px;
+  }
+  .star-wrapper a:hover {
+	color: orange;
+	transform: scale(1.5);
+	/* direction: rtl; */
+  }
+  
+
+  .s1.is-active, .s2.is-active, .s3.is-active, .s4.is-active, .s5.is-active {
+	  /* --percent : cal(var(--rating) * 100%);
+	  background-image: linear-gradient(90deg, gold var(--percent), grey 2px); */
+	  color: gold;
+  }
+
+
+
+  .s1.decimal, .s2.decimal, .s3.decimal, .s4.decimal, .s5.decimal{
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	/* text-fill-color: transparent; */
+	--percent : calc(var(--rating) * 100%);
+	background-image: linear-gradient(90deg, gold var(--percent), grey 2px);
+  }
+
+  /* .s1.decimal::after, .s2.decimal::after, .s3.decimal::after, .s4.decimal::after, .s5.decimal::after {
+	content: "\f006";
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: gold;
+	} */
+
+  .s1.is-hover, .s2.is-hover, .s3.is-hover, .s4.is-hover, .s5.is-hover {
+	  color: orange;
+  }
+
+  .wraper {
+	position: absolute;
+	bottom: 30px;
+	right: 50px;
+  }
+  

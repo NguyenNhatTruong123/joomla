@@ -16,6 +16,7 @@ use Joomla\CMS\Language\Text;
 use Kunena\Forum\Libraries\Config\KunenaConfig;
 use Kunena\Forum\Libraries\Factory\KunenaFactory;
 use Kunena\Forum\Libraries\Template\KunenaTemplate;
+use Kunena\Forum\Libraries\User\KunenaUserHelper;
 
 Text::script('COM_KUNENA_RATE_LOGIN');
 Text::script('COM_KUNENA_RATE_NOT_YOURSELF');
@@ -44,6 +45,8 @@ $social          = $this->ktemplate->params->get('socialshare');
 $quick           = $this->ktemplate->params->get('quick');
 $txt             = '';
 
+$this->me = KunenaUserHelper::getMyself();
+
 if ($this->topic->ordering)
 {
 	$txt .= ' topic-sticky';
@@ -61,23 +64,28 @@ if ($this->topic->locked)
 			<?php echo $this->category->displayField('headerdesc'); ?>
         </div>
 	<?php endif; ?>
+	
+	<div style="display: flex; align-items:baseline; gap: 40px">
+		<h1 style="flex: 1;">
+			<?php echo KunenaTemplate::getInstance()->getTopicIcon($this->topic); ?>
+			<?php
+			if ($this->ktemplate->params->get('labels') != 0)
+			{
+				echo $this->subLayout('Widget/Label')->set('topic', $this->topic)->setLayout('default');
+			}
+			?>
+			<?php echo $this->topic->displayField('subject'); ?>
+		</h1>
+		<div style="border-style: solid; border-width: thin;color: gainsboro;border-radius: 5px; padding: 6px 10px">
 
-    <h1>
-		<?php echo KunenaTemplate::getInstance()->getTopicIcon($this->topic); ?>
-		<?php
-		if ($this->ktemplate->params->get('labels') != 0)
-		{
-			echo $this->subLayout('Widget/Label')->set('topic', $this->topic)->setLayout('default');
-		}
-		?>
-		<?php echo $this->topic->displayField('subject'); ?>
-
-		<?php if (KunenaConfig::getInstance()->ratingEnabled)
-		{
-			echo $this->subLayout('Topic/Item/Rating')->set('category', $this->category)
-				->set('topic', $this->topic);
-		} ?>
-    </h1>
+		<div style="display:block; font-size:18px; float:left; line-height:100%; padding-top:7px; color: black"><?php echo $this->me->userid == 0 ? "Average rate" : "Your rate" ?></div>
+			<?php if (KunenaConfig::getInstance()->ratingEnabled)
+				{
+					echo $this->subLayout('Topic/Item/Rating')->set('category', $this->category)
+						->set('topic', $this->topic);
+				} ?>
+		</div>
+	</div>
 
     <div><?php echo $this->subRequest('Topic/Item/Actions')->set('id', $this->topic->id); ?></div>
 

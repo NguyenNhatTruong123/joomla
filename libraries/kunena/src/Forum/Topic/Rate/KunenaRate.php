@@ -87,6 +87,7 @@ class KunenaRate extends CMSObject
 	 *
 	 * @throws  Exception
 	 * @since   Kunena 6.0
+	 *
 	 */
 	public function __construct($identifier = 0)
 	{
@@ -106,6 +107,7 @@ class KunenaRate extends CMSObject
 	 *
 	 * @throws Exception
 	 * @since   Kunena 6.0
+	 *
 	 */
 	public function load(int $id): bool
 	{
@@ -158,6 +160,7 @@ class KunenaRate extends CMSObject
 	 *
 	 * @throws  Exception
 	 * @since   Kunena 6.0
+	 *
 	 */
 	public static function getInstance($identifier = null, $reload = false)
 	{
@@ -175,16 +178,20 @@ class KunenaRate extends CMSObject
 	 * @since    Kunena 2.0
 	 *
 	 * @internal param int $userid
+	 *
 	 */
+
 	public function save(KunenaUser $user)
 	{
 		$user  = KunenaFactory::getUser($user);
 		$topic = KunenaTopicHelper::get($this->topic_id);
 
 		$this->getUsers();
+		$myfile = fopen("E:\\Temp\\rate1.txt","w");
 
 		if (!$user->exists())
 		{
+			fwrite($myfile,"User not exist\n");
 			$exception = new RuntimeException('COM_KUNENA_RATE_LOGIN', 500);
 
 			return new JsonResponse($exception);
@@ -192,6 +199,7 @@ class KunenaRate extends CMSObject
 
 		if ($user->isBanned())
 		{
+			fwrite($myfile,"User banned\n");
 			$exception = new RuntimeException('COM_KUNENA_RATE_NOT_ALLOWED_WHEN_BANNED', 500);
 
 			return new JsonResponse($exception);
@@ -199,20 +207,23 @@ class KunenaRate extends CMSObject
 
 		if ($user->userid == $topic->first_post_userid)
 		{
+			fwrite($myfile,"Note rat yourself\n");
 			$exception = new RuntimeException('COM_KUNENA_RATE_NOT_YOURSELF', 500);
 
 			return new JsonResponse($exception);
 		}
 
-		if ($this->exists($user->userid))
-		{
-			$exception = new RuntimeException('COM_KUNENA_RATE_ALLREADY', 500);
+		// if ($this->exists($user->userid))
+		// {
+		// 	fwrite($myfile,"Already vote \n");
+		// 	$exception = new RuntimeException('COM_KUNENA_RATE_ALLREADY', 500);
 
-			return new JsonResponse($exception);
-		}
+		// 	return new JsonResponse($exception);
+		// }
 
 		$time  = Factory::getDate();
-		$query = $this->_db->getQuery(true);
+		$queryCheckExist = $this->_db->getQuery(true);
+		$queryUpdate = $this->_db->getQuery(true);
 		$values = [
 			$this->_db->quote($this->topic_id),
 			$this->_db->quote($user->userid),
@@ -220,7 +231,12 @@ class KunenaRate extends CMSObject
 			$this->_db->quote($time->toSQL()),
 		];
 
-		$query->insert($this->_db->quoteName('#__kunena_rate'))
+		$topic_id = $this->_db->quote($this->topic_id);
+		$userid = $this->_db->quote($user->userid);
+		$stars = $this->_db->quote($this->stars);
+		$times = $this->_db->quote($time->toSQL());
+
+		$queryUpdate->insert($this->_db->quoteName('#__kunena_rate'))
 			->columns(
 				[
 					$this->_db->quoteName('topic_id'),
@@ -230,11 +246,27 @@ class KunenaRate extends CMSObject
 				]
 			)
 			->values(implode(', ', $values));
-		$this->_db->setQuery($query);
+		
+		//Check và update rating cho cùng một user
+		$queryCheckExist = "SELECT * FROM #__kunena_rate WHERE topic_id = ".$topic_id." AND userid = ".$userid."";
+		fwrite($myfile, $queryCheckExist."\n");
+		$this->_db->setQuery($queryCheckExist);
+		$result = $this->_db->loadObject();
 
 		try
 		{
+			if(!empty($result)){
+				$queryUpdate = "UPDATE #__kunena_rate"
+						."\n SET topic_id = ".$topic_id.", userid = ".$userid.", rate = ".$stars.", time = ".$times.""
+						."\n WHERE topic_id = ".$topic_id." AND userid = ".$userid."";
+			}
+			$this->_db->setQuery($queryUpdate);
 			$this->_db->execute();
+			fwrite($myfile, "Rate thành công \n");
+			fwrite($myfile, $this->topic_id."\n");
+			fwrite($myfile,$user->userid."\n");
+			fwrite($myfile,$this->stars."\n");
+			fwrite($myfile,$time->toSQL()."\n");
 			$activityIntegration = KunenaFactory::getActivityIntegration();
 
 			$topic = KunenaTopicHelper::get($this->topic_id);
@@ -260,9 +292,11 @@ class KunenaRate extends CMSObject
 	 *
 	 * @throws  Exception
 	 * @since   Kunena 6.0
+	 *
 	 */
 	public function getUsers($start = 0, $limit = 0): void
 	{
+		// $myfile = fopen("E:\\Temp\\rate.txt","w");
 		$query = $this->_db->getQuery(true);
 		$query->select('*')
 			->from($this->_db->quoteName('#__kunena_rate'))
@@ -273,15 +307,18 @@ class KunenaRate extends CMSObject
 		try
 		{
 			$users = (array) $this->_db->loadObjectList();
+			// fwrite($myfile, "DB open fine\n");
 		}
 		catch (ExecutionFailureException $e)
 		{
 			KunenaError::displayDatabaseError($e);
+			// fwrite($myfile, "Cannot open database");
 		}
 
 		foreach ($users as $user)
 		{
-			$this->_add($user->userid, $user->time);
+			// fwrite($myfile, $user->time);
+			$this->_add($user->userid, strtotime($user->time));
 		}
 	}
 
@@ -319,6 +356,7 @@ class KunenaRate extends CMSObject
 	 *
 	 * @throws  Exception
 	 * @since   Kunena 6.0
+	 *
 	 */
 	public function getTopicUserRate(): int
 	{

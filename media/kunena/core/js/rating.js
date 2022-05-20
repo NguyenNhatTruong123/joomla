@@ -46,18 +46,29 @@
 				throw Error('Current rating is out of bounds.');
 			}
 
+			let decimal = currentRating - Math.floor(currentRating);
+			// let decimal = 0.7;
 			for (let i = 0; i < maxRating; i++) {
-				const star = document.createElement('li');
-				star.classList.add('c-rating__item');
+				const star = document.createElement('a');
+				star.classList.add('fas');
+				star.classList.add('fa-star');
+				star.classList.add('s' + (i + 1));
 				star.setAttribute('data-index', i);
-				if (i < currentRating) {
+				
+				if ( i < Math.floor(currentRating)){
 					star.classList.add('is-active');
+				} else {
+					if (i == Math.floor(currentRating) && i != 0 && decimal != 0){
+						star.classList.add('decimal');
+						star.style = "--rating: " + decimal;
+					}
 				}
 
 				el.appendChild(star);
 				stars.push(star);
 				attachStarEvents(star);
 			}
+
 		})();
 
 		/**
@@ -101,10 +112,14 @@
 			star.addEventListener('mouseover', function (e) {
 				iterate(stars, function (item, index) {
 					if (index <= parseInt(star.getAttribute('data-index'))) {
-						item.classList.add('is-active');
+						item.classList.add('is-hover');
+						item.classList.remove('is-active');
+						item.classList.remove('decimal');
 					}
 					else {
+						item.classList.remove('is-hover');
 						item.classList.remove('is-active');
+						item.classList.remove('decimal');
 					}
                     }
 				);
@@ -136,6 +151,7 @@
 		 */
 		function starClick(star)
 		{
+			// alert("Click Start")
 			star.addEventListener('click', function (e) {
 				e.preventDefault();
 				setRating(parseInt(star.getAttribute('data-index')) + 1, true);
@@ -163,12 +179,18 @@
 			}
 
 			currentRating = value || currentRating;
-
 			iterate(stars, function (star, index) {
-				if (index < currentRating) {
+				let decimal = currentRating - Math.floor(currentRating);
+				if (index < Math.floor(currentRating)) {
+					star.classList.remove('is-hover');
 					star.classList.add('is-active');
 				}
 				else {
+					star.classList.remove('is-hover');
+					if ( index == Math.floor(currentRating) && index != 0 && decimal != 0){
+						star.classList.add('decimal');
+						star.style = "--rating: " + decimal;
+					}
 					star.classList.remove('is-active');
 				}
                 }

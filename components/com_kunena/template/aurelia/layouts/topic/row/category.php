@@ -69,7 +69,7 @@ if (!empty($this->spacing)) : ?>
         </th>
 	<?php endif; ?>
     <td>
-        <div>
+        <div style="display: flex ; align-items: baseline">
 			<?php
 			if ($this->ktemplate->params->get('labels') != 0)
 			{
@@ -131,14 +131,8 @@ if (!empty($this->spacing)) : ?>
             </div>
         </div>
 
-        <div id="klastpostphone" class="visible-xs">
-			<?php echo $this->getTopicLink($this->topic, 'last', Text::_('COM_KUNENA_GEN_LAST_POST'), null, null, $category, false, true); ?>
-			<?php if ($config->postDateFormat != 'none') : ?>
-				<?php echo $topic->getLastPostTime()->toKunena('config_postDateFormat'); ?> <br>
-			<?php endif; ?>
-			<?php echo Text::_('COM_KUNENA_BY') . ' ' . $this->topic->getLastPostAuthor()->getLink(null, null, '', '', null, $category->id); ?>
-        </div>
-
+		<!-- klastpostphone was removed -->
+        
         <div class="float-start">
 			<?php echo $this->subLayout('Widget/Pagination/List')->set('pagination', $topicPages)->setLayout('simple'); ?>
         </div>
